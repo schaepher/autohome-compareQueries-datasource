@@ -110,6 +110,16 @@ export class CompareQueriesDatasource {
                 };
                 compareOptions.rangeRaw = compareOptions.range.raw;
 
+                compareOptions.scopedVars['__from'] = {
+                  text: '__from',
+                  value: compareOptions.range.from,
+                };
+
+                compareOptions.scopedVars['__to'] = {
+                  text: '__to',
+                  value: compareOptions.range.to,
+                };
+
                 queryObj.refId = queryObj.refId + '_' + timeShiftValue;
                 compareOptions.targets = [queryObj];
                 compareOptions.requestId = compareOptions.requestId + '_' + timeShiftValue;
@@ -151,6 +161,12 @@ export class CompareQueriesDatasource {
                         );
                       }
                     });
+                  } else if (line.columns) {
+                    line.columns.forEach(function(field) {
+                      if (field.text) {
+                        field.text = _this.generalAlias(field.text, timeShiftAlias, aliasType, delimiter);
+                      }
+                    });
                   }
 
                   if (target.process) {
@@ -186,6 +202,12 @@ export class CompareQueriesDatasource {
                           }
                           line.fields[0] = timeField;
                         }
+                      } else if (line.rows && line.rows.length > 0) {
+                        line.rows.forEach(function(datapoint) {
+                          datapoint[0] = new Date(Date.parse(datapoint[0]) + timeShift_ms);
+                        });
+                      } else {
+                        console.log('unsupport line format');
                       }
                     }
                   }
